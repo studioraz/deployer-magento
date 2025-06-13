@@ -31,6 +31,7 @@ use function Deployer\select;
 use function Deployer\task;
 use function Deployer\get;
 use function Deployer\test;
+use function Deployer\on;
 
 
 // **************************** CONSTANTS **************************/
@@ -44,8 +45,8 @@ add('recipes', ['magento2']);
 desc('Compiles magento di');
 task('magento:compile', function () {
     if (test('[ ! -d {{release_or_current_path}}/{{magento_dir}}/generated/code ]')) {
-    run("{{bin/php}} {{bin/magento}} setup:di:compile");
-    run('cd {{release_or_current_path}}/{{magento_dir}} && {{bin/composer}} dump-autoload -o');
+        run("{{bin/php}} {{bin/magento}} setup:di:compile");
+        run('cd {{release_or_current_path}}/{{magento_dir}} && {{bin/composer}} dump-autoload -o');
     } else {
         writeln('<info>Generated cache found. Skipping compilation.</info>');
     }
