@@ -8,6 +8,13 @@ require_once 'contrib/slack.php';
 require_once  __DIR__ . '/config.php';
 require_once  __DIR__ . '/artifact.php';
 
+/** -----------------------------------------------------------------
+ *  Auto-register every file in ../tasks/   (one-liner loops are ok)
+ * ----------------------------------------------------------------*/
+foreach (glob(__DIR__ . '/../tasks/*.php') as $file) {
+    require_once $file;
+}
+
 use Deployer\Host;
 use Deployer\ConfigurationException;
 use function Deployer\Support\array_is_list;
@@ -144,6 +151,7 @@ task('magento:sync:content_version', function () {
 
 before('magento:deploy:assets', 'magento:sync:content_version');
 
+before('magento:deploy:assets', 'hyva:tailwind:build');
 
 
 desc('Enables maintenance mode');
@@ -173,6 +181,9 @@ task('magento:config:import', function () {
         writeln('App config is up to date => import skipped');
     }
 });
+
+after('magento:config:import', 'studioraz:config:data:import');
+
 
 desc('Upgrades magento database');
 task('magento:upgrade:db', function () {

@@ -169,3 +169,7 @@ set('slack_failure_text', 'Deploy to *{{alias}}* failed');
 before('deploy', 'slack:notify');
 after('deploy:success', 'slack:notify:success');
 after('deploy:failed', 'slack:notify:failure');
+
+
+# Global variable so other tasks/hosts can override if needed
+set('config_store_path', '{{release_or_current_path}}/{{magento_dir}}/config/store');
