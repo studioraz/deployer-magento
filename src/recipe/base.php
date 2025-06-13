@@ -125,7 +125,7 @@ function magentoDeployAssetsSplit(string $area)
 desc('Syncs content version');
 task('magento:sync:content_version', function () {
     $timestamp = time();
-    on(select('all'), function (Host $host) use ($timestamp) {
+    on(select('all'), function ($host) use ($timestamp) {
         $host->set('content_version', $timestamp);
     });
 })->once();
