@@ -7,7 +7,7 @@ use function Deployer\run;
 use function Deployer\task;
 use function Deployer\after;
 use function Deployer\test;
-
+use function Deployer\currentHost;
 desc('Import custom config from JSON files');
 task('config:data:import', function () {
     if (test('[ -d {{config_store_path}} ]')) {
