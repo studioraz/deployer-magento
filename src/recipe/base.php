@@ -163,7 +163,7 @@ task('magento:config:import', function () {
     }
 });
 
-after('magento:config:import', 'studioraz:config:data:import');
+after('magento:config:import', 'config:data:import');
 
 
 desc('Upgrades magento database');
