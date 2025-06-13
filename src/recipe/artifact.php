@@ -86,6 +86,15 @@ set('bin/tar', function () {
 
 desc('Packages all relevant files in an artifact.');
 task('artifact:package', function () {
+
+    if (test('[ -d {{artifact_dir}} ]')) {
+        writeln('<comment>Artifact directory already exists; skipping package step.</comment>');
+        return;
+    }
+    // Create artifact directory
+    run('mkdir -p {{artifact_dir}}');
+
+
     // Ensure temporary include/exclude files exist (variables are lazily evaluated)
     get('artifact_excludes_file');
     get('artifact_includes_file');
@@ -130,7 +139,7 @@ task('artifact:extract', function () {
 
 desc('Prepare local artifact build');
 task('build:prepare', function () {
-    if (!currentHost()->get('local')) {
+    if (!currentHost()->get('dev')) {
         throw new GracefulShutdownException('Artifact can only be built locally, you provided a non local host');
     }
 
@@ -146,7 +155,7 @@ task('artifact:build', [
     'build:prepare',
     'magento:compile',
     'magento:deploy:assets',
-    'build:artifact:package',
+    'artifact:package',
 ]);
 
 desc('Prepares an artifact on the target server');
@@ -181,19 +190,5 @@ task('artifact:deploy', [
     'deploy:symlink',
     'artifact:finish',
 ]);
-
-// Build artifact package: ensure artifact directory exists before packaging
-desc('Prepare artifact folder and package');
-task('build:artifact:package', function () {
-    // If artifact directory already exists, skip packaging
-    if (test('[ -d {{artifact_dir}} ]')) {
-        writeln('<comment>Artifact directory already exists; skipping package step.</comment>');
-        return;
-    }
-    // Create artifact directory
-    run('mkdir -p {{artifact_dir}}');
-    // Invoke the artifact packaging task
-    invoke('artifact:package');
-});
 
 fail('artifact:deploy', 'deploy:failed');

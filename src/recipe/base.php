@@ -17,6 +17,7 @@ foreach (glob(__DIR__ . '/../tasks/*.php') as $file) {
 
 use Deployer\Host;
 use Deployer\ConfigurationException;
+use function Deployer\localhost;
 use function Deployer\Support\array_is_list;
 use function Deployer\add;
 use function Deployer\desc;
@@ -31,11 +32,16 @@ use function Deployer\task;
 use function Deployer\get;
 
 
+// **************************** CONSTANTS **************************/
 const ENV_CONFIG_FILE_PATH = 'app/etc/env.php';
 const TMP_ENV_CONFIG_FILE_PATH = 'app/etc/env_tmp.php';
 
+
 add('recipes', ['magento2']);
 
+// ** localhost configuration
+localhost()
+    ->set('local', true);
 
 desc('Compiles magento di');
 task('magento:compile', function () {
