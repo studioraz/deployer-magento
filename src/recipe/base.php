@@ -32,6 +32,8 @@ use function Deployer\task;
 use function Deployer\get;
 use function Deployer\test;
 use function Deployer\on;
+use function Deployer\download;
+use function Deployer\upload;
 
 
 // **************************** CONSTANTS **************************/
