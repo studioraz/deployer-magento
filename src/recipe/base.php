@@ -21,6 +21,7 @@ use function Deployer\before;
 use function Deployer\after;
 use function Deployer\select;
 use function Deployer\task;
+use function Deployer\get;
 
 
 const ENV_CONFIG_FILE_PATH = 'app/etc/env.php';
