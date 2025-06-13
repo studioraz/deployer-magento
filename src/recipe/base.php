@@ -30,6 +30,7 @@ use function Deployer\after;
 use function Deployer\select;
 use function Deployer\task;
 use function Deployer\get;
+use function Deployer\test;
 
 
 // **************************** CONSTANTS **************************/
