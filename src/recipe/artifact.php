@@ -152,10 +152,10 @@ task('artifact:build', [
 
 desc('Build di generated code');
 task('build:magento:compile', function () {
-    if (test('[ -z {{release_or_current_path}}/{{magento_dir}}/generated ]')) {
+    if (test('[ -z {{release_or_current_path}}/{{magento_dir}}/generated/code ]')) {
         run('{{bin/php}} {{bin/magento}} setup:di:compile');
     } else {
-        writeln('<info>Skipping compilation, generated folder is not empty.</info>');
+        writeln('<info>Generated cache found. Skipping compilation.</info>');
     }
 });
 
