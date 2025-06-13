@@ -15,7 +15,7 @@ foreach (glob(__DIR__ . '/../tasks/*.php') as $file) {
     require_once $file;
 }
 
-use Deployer\Host;
+use Deployer\Host\Host;
 use Deployer\ConfigurationException;
 use function Deployer\localhost;
 use function Deployer\Support\array_is_list;
