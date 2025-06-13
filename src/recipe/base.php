@@ -39,9 +39,6 @@ const TMP_ENV_CONFIG_FILE_PATH = 'app/etc/env_tmp.php';
 
 add('recipes', ['magento2']);
 
-// ** localhost configuration
-localhost()
-    ->set('local', true);
 
 desc('Compiles magento di');
 task('magento:compile', function () {
