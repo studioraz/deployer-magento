@@ -9,7 +9,7 @@ use function Deployer\task;
 use function Deployer\writeln;
 
 desc('Builds Tailwind CSS for Hyva themes');
-task('hyva:tailwind:build:', function () {
+task('hyva:tailwind:build', function () {
     $themes = get('hyva_themes');
 
     if (!is_array($themes)) {

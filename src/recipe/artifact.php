@@ -144,27 +144,10 @@ task('build:prepare', function () {
 desc('Builds an artifact.');
 task('artifact:build', [
     'build:prepare',
-    //'deploy:vendors',
-    'build:magento:compile',
-    'build:magento:assets',
+    'magento:compile',
+    'magento:deploy:assets',
     'build:artifact:package',
 ]);
-
-desc('Build di generated code');
-task('build:magento:compile', function () {
-    if (test('[ ! -d {{release_or_current_path}}/{{magento_dir}}/generated/code ]')) {
-        run('{{bin/php}} {{bin/magento}} setup:di:compile');
-    } else {
-        writeln('<info>Generated cache found. Skipping compilation.</info>');
-    }
-});
-
-// Deploy static assets for Magento
-desc('Build static assets');
-task('build:magento:assets', function () {
-    invoke('magento:deploy:assets');
-});
-
 
 desc('Prepares an artifact on the target server');
 task('artifact:prepare', [

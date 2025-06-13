@@ -37,40 +37,16 @@ const TMP_ENV_CONFIG_FILE_PATH = 'app/etc/env_tmp.php';
 add('recipes', ['magento2']);
 
 
-
-// To work correctly with artifact deployment, it is necessary to set the MAGE_MODE correctly in `app/etc/config.php`
-// e.g.
-// ```php
-// 'MAGE_MODE' => 'production'
-// ```
 desc('Compiles magento di');
 task('magento:compile', function () {
+    if (test('[ ! -d {{release_or_current_path}}/{{magento_dir}}/generated/code ]')) {
     run("{{bin/php}} {{bin/magento}} setup:di:compile");
     run('cd {{release_or_current_path}}/{{magento_dir}} && {{bin/composer}} dump-autoload -o');
+    } else {
+        writeln('<info>Generated cache found. Skipping compilation.</info>');
+    }
 });
 
-
-
-// To work correctly with artifact deployment it is necessary to set `system/dev/js` , `system/dev/css` and `system/dev/template`
-// in `app/etc/config.php`, e.g.:
-// ```php
-// 'system' => [
-//     'default' => [
-//         'dev' => [
-//             'js' => [
-//                 'merge_files' => '1',
-//                 'minify_files' => '1'
-//             ],
-//             'css' => [
-//                 'merge_files' => '1',
-//                 'minify_files' => '1'
-//             ],
-//             'template' => [
-//                 'minify_html' => '1'
-//             ]
-//         ]
-//     ]
-// ```
 desc('Deploys assets');
 task('magento:deploy:assets', function () {
     $themesToCompile = '';
