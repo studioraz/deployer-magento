@@ -139,7 +139,7 @@ task('artifact:extract', function () {
 
 desc('Prepare local artifact build');
 task('build:prepare', function () {
-    if (!currentHost()->get('dev')) {
+    if (!currentHost()->get('local')) {
         throw new GracefulShutdownException('Artifact can only be built locally, you provided a non local host');
     }
 
