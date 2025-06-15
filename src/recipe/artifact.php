@@ -101,6 +101,10 @@ task('artifact:package', function () {
 
     writeln('<info>Starting compression...</info>');
 
+    // Prefix all included paths under magento_dir if set
+    $magentoDir = get('magento_dir');
+    $transformOption = $magentoDir ? sprintf('--transform="s,^(.*),%s/\\1,"', $magentoDir) : '';
+
     // Build the tar command:
     //  - --posix: use portable format
     //  - --exclude: avoid including the archive itself
@@ -109,9 +113,10 @@ task('artifact:package', function () {
     //  - --files-from: include only the listed files
     //  - --use-compress-program="zstdmt": multi-threaded Zstd without extra flags
     $cmd = sprintf(
-        '%s --posix --exclude=%s --exclude-from=%s -C %s -cf %s --files-from=%s '
+        '%s %s --posix --exclude=%s --exclude-from=%s -C %s -cf %s --files-from=%s '
         . '--use-compress-program="zstdmt"',
         '{{bin/tar}}',
+        $transformOption,
         '{{artifact_path}}',
         '{{artifact_excludes_file}}',
         '{{release_or_current_path}}',
