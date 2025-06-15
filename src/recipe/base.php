@@ -15,7 +15,7 @@ foreach (glob(__DIR__ . '/../tasks/*.php') as $file) {
     require_once $file;
 }
 
-use Deployer\Host\Host;
+use Deployer\Host;
 use Deployer\ConfigurationException;
 use function Deployer\localhost;
 use function Deployer\Support\array_is_list;
@@ -127,7 +127,7 @@ function magentoDeployAssetsSplit(string $area)
 desc('Syncs content version');
 task('magento:sync:content_version', function () {
     $timestamp = time();
-    on(select('all'), function ($host) use ($timestamp) {
+    on(select('all'), function (Host $host) use ($timestamp) {
         $host->set('content_version', $timestamp);
     });
 })->once();
@@ -165,7 +165,7 @@ task('magento:config:import', function () {
     }
 });
 
-after('magento:config:import', 'config:data:import');
+after('magento:config:import', 'studioraz:config:data:import');
 
 
 desc('Upgrades magento database');

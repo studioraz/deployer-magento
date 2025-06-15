@@ -173,3 +173,6 @@ after('deploy:failed', 'slack:notify:failure');
 
 # Global variable so other tasks/hosts can override if needed
 set('config_store_path', '{{release_or_current_path}}/{{magento_dir}}/config/store');
+
+// Path to the package.json file for the Tailwind CSS package
+set('hvya-tailwind-package_path', '{{release_or_current_path}}/{{magento_dir}}/package.json');
