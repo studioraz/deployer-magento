@@ -175,4 +175,4 @@ after('deploy:failed', 'slack:notify:failure');
 set('config_store_path', '{{release_or_current_path}}/{{magento_dir}}/config/store');
 
 // Path to the package.json file for the Tailwind CSS package
-set('hvya_tailwind_package_path', '{{release_or_current_path}}/{{magento_dir}}/package.json');
+set('hyva_tailwind_package_path', '{{release_or_current_path}}/{{magento_dir}}/package.json');
