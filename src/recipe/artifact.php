@@ -20,6 +20,7 @@ use function Deployer\testLocally;
 use function Deployer\upload;
 use function Deployer\which;
 use function Deployer\writeln;
+use function Deployer\before;
 use function Deployer\after;
 use function Deployer\onError;
 
