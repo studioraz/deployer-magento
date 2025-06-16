@@ -191,4 +191,12 @@ task('artifact:deploy', [
     'artifact:finish',
 ]);
 
+
 fail('artifact:deploy', 'deploy:failed');
+
+after('deploy:failed', 'deploy:unlock');
+
+
+
+
+
