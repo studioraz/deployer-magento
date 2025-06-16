@@ -21,6 +21,7 @@ use function Deployer\upload;
 use function Deployer\which;
 use function Deployer\writeln;
 use function Deployer\after;
+use function Deployer\onError;
 
 // Artifact deployment section
 
@@ -193,11 +194,14 @@ task('artifact:deploy', [
 ]);
 
 
+// a workaround to unlock the deployment pipeline
+// TODO: implement a permanay solution to detect the point of failure and unlock in it's context.
+before('artifact:prepare', [
+    'deploy:unlock'
+]);
+
+
 fail('artifact:deploy', 'deploy:failed');
-
-after('deploy:failed', 'deploy:unlock');
-
-
 
 
 
