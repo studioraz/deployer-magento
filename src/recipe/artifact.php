@@ -197,9 +197,7 @@ task('artifact:deploy', [
 
 // a workaround to unlock the deployment pipeline
 // TODO: implement a permanay solution to detect the point of failure and unlock in it's context.
-before('artifact:prepare', [
-    'deploy:unlock'
-]);
+before('artifact:prepare', 'deploy:unlock');
 
 
 fail('artifact:deploy', 'deploy:failed');
