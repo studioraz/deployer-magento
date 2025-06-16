@@ -176,7 +176,6 @@ task('artifact:prepare', [
 
 desc('Executes the tasks after artifact is released');
 task('artifact:finish', [
-    'magento:cache:flush',
     'cachetool:clear:opcache',
     'deploy:cleanup',
     'deploy:unlock',
