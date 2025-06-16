@@ -48,7 +48,10 @@ desc('Compiles magento di');
 task('magento:compile', function () {
     if (test('[ ! -d {{release_or_current_path}}/{{magento_dir}}/generated/code ]')) {
         run("{{bin/php}} {{bin/magento}} setup:di:compile");
-        run('cd {{release_or_current_path}}/{{magento_dir}} && {{bin/composer}} dump-autoload -o');
+
+        // avoid running composer dump-autoload to allow caching healthy vendor version for next deploy.
+        //run('cd {{release_or_current_path}}/{{magento_dir}} && {{bin/composer}} dump-autoload -o');
+
     } else {
         writeln('<info>Generated cache found. Skipping compilation.</info>');
     }
