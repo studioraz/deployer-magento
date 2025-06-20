@@ -91,8 +91,8 @@ cat > "$PKG_JSON_FILE" <<EOF
     "app/design/frontend/$THEME_NS/web/tailwind"
   ],
   "scripts": {
-    "build:child": "npm --workspace app/design/frontend/$THEME_NS/web/tailwind run build-prod",
-    "build:all": "npm run build:child"
+    "build-base": "npm --workspace app/design/frontend/$THEME_NS/web/tailwind run build-prod",
+    "build-all": "npm run build-base"
   }
 }
 EOF
@@ -100,27 +100,48 @@ EOF
 echo "✔ package.json written to $MAGENTO_ROOT/$PKG_JSON_FILE"
 fi
 
-# 6) Copy Deployer configuration into project root
-echo "==> Copying Deployer configuration into project root"
-cp -r vendor/studioraz/deployer-magento2/deployer .
-echo "✔ Deployer config copied to $(pwd)/deployer"
+# 7) Create a basic deploy.php template in the Magento root
+echo "==> Generating a basic deploy.php template in $PROJECT_DIR/deploy.php"
+cat > "$PROJECT_DIR/deploy.php" <<'EOF'
+<?php
+namespace Deployer;
 
-# 7) Download deploy.php from remote repository
-read -rp "Download deploy.php entrypoint into $PROJECT_DIR/deploy.php? [Y/n]: " DL_DEPLOY
-DL_DEPLOY="${DL_DEPLOY:-Y}"
-if [[ "$DL_DEPLOY" =~ ^[Yy]$ ]]; then
-  DEST="$PROJECT_DIR/deploy.php"
-  echo "Downloading deploy.php to $DEST"
-  curl -sSL "https://raw.githubusercontent.com/studioraz/project-hyva/refs/heads/master/src/deploy.php?token=GHSAT0AAAAAADFEEEZK3IMS45CBKISKR7DA2CR3VDA" -o "$DEST"
-  if [ $? -ne 0 ]; then
-    echo "Error: Failed to download deploy.php"
-    exit 1
-  fi
-  echo "✔ deploy.php downloaded to $DEST"
-  echo "Please review and customize $DEST by copying project settings from [repo_root]/deployer/deployer.php"
-else
-  echo "Skipped downloading deploy.php"
-fi
+use Deployer\Exception\GracefulShutdownException;
+
+require __DIR__ . '/vendor/autoload.php';
+
+use SR\Deployer\RecipeLoader;
+
+RecipeLoader::load();
+
+localhost()
+    ->set('local', true);
+
+// **************************** Hosts **************************/
+
+// copy from [repo-root]/deployer/deployer.php
+
+// *************************** General Configuration **************************/
+
+// copy your hosts from [repo-root]/deployer/deployer.php
+
+set('application', '');
+set('repository', '');
+
+// *************************** Static Content **************************/
+
+// copy your settings from [repo-root]/deployer/deployer.php
+
+set('magento_themes', []);
+
+// **************************** Slack Notifications ****************************/
+
+// copy your settings from [repo-root]/deployer/deployer.php
+set('slack_webhook', '');
+set('slack_channel', '');
+EOF
+
+echo "✔ Basic deploy.php template created at $PROJECT_DIR/deploy.php. Please customize it using settings from [repo-root]/deployer/deployer.php."
 
 # 8) Update src/composer.json allow-plugins section
 COMPOSER_JSON="${MAGENTO_ROOT}/composer.json"
