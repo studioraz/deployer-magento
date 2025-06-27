@@ -160,5 +160,5 @@ fi
 
 echo "🎉 Setup complete! Next steps:"
 echo "  • Review and commit $WORKFLOW_FILE"
-echo "  • cd $MAGENTO_ROOT && npm ci && npm run build:all"
+echo "  • cd $MAGENTO_ROOT && npm ci && npm run build-all"
 echo "  • Commit and push your changes"
