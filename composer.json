@@ -2,7 +2,7 @@
   "name": "studioraz/deployer-magento",
   "description": "Standalone Deployer recipes and artifact tooling for Magento 2",
   "license": "MIT",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "require": {
     "php": ">=8.0",
     "deployer/deployer": "^7.3"
