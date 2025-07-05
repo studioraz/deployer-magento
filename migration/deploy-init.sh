@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# 1) Ask for Magento root
-read -rp "Enter your Magento root directory (relative to this folder) [src]: " MAGENTO_ROOT
-MAGENTO_ROOT="${MAGENTO_ROOT:-src}"
-
 # 2) Gather inputs for the GH workflow
 echo "==> Configuring Build & Deploy workflow"
 read -rp "PHP version to use [8.3]: " PHP_VERSION
 PHP_VERSION="${PHP_VERSION:-8.3}"
-
-read -rp "Project directory under repo [${MAGENTO_ROOT}]: " PROJECT_DIR
-PROJECT_DIR="${PROJECT_DIR:-$MAGENTO_ROOT}"
 
 read -rp "Default environment name [staging]: " DEFAULT_ENV
 DEFAULT_ENV="${DEFAULT_ENV:-staging}"
@@ -47,7 +40,7 @@ done)
       project-dir:
         description: Path to Magento root
         required: true
-        default: "$PROJECT_DIR"
+        default: "."
 
 jobs:
   call-build-and-deploy:
@@ -61,26 +54,15 @@ EOF
 
 echo "✔ Workflow written to $WORKFLOW_FILE"
 
-# 4) Install deployer-magento2 in Magento root
-echo "==> Installing studioraz/deployer-magento2 via Composer in $MAGENTO_ROOT"
-cd "$MAGENTO_ROOT"
-if [ ! -f composer.json ]; then
-  echo "No composer.json found in $MAGENTO_ROOT"
-  exit 1
-fi
-composer require studioraz/deployer-magento2 --no-update
-echo "Updating lock file"
-composer update --lock --no-interaction
-
 # 5) Create package.json in Magento root (only if using Hyvä themes)
 read -rp "Is this project using Hyvä themes? [Y/n]: " USE_HYVA
 USE_HYVA="${USE_HYVA:-Y}"
 if [[ ! "$USE_HYVA" =~ ^[Yy]$ ]]; then
   echo "Skipping package.json creation for Hyvä"
 else
-echo "==> Creating package.json for Tailwind workspaces in $MAGENTO_ROOT"
-read -rp "Theme namespace/vendor (e.g. StudioRaz/MyTheme) [StudioRaz/MyTheme]: " THEME_NS
-THEME_NS="${THEME_NS:-StudioRaz/MyTheme}"
+echo "==> Creating package.json for Tailwind workspaces"
+read -rp "Theme namespace/vendor (e.g. SR/Base) [SR/Base]: " THEME_NS
+THEME_NS="${THEME_NS:-SR/Base}"
 
 PKG_JSON_FILE="package.json"
 cat > "$PKG_JSON_FILE" <<EOF
@@ -88,6 +70,7 @@ cat > "$PKG_JSON_FILE" <<EOF
   "name": "studioraz/hyva-themes",
   "private": true,
   "workspaces": [
+    "vendor/hyva-themes/hyva-theme-base/web/tailwind",
     "app/design/frontend/$THEME_NS/web/tailwind"
   ],
   "scripts": {
@@ -97,12 +80,12 @@ cat > "$PKG_JSON_FILE" <<EOF
 }
 EOF
 
-echo "✔ package.json written to $MAGENTO_ROOT/$PKG_JSON_FILE"
+echo "✔ package.json written to $PKG_JSON_FILE"
 fi
 
 # 7) Create a basic deploy.php template in the Magento root
-echo "==> Generating a basic deploy.php template in $PROJECT_DIR/deploy.php"
-cat > "$PROJECT_DIR/deploy.php" <<'EOF'
+echo "==> Generating a basic deploy.php template in deploy.php"
+cat > "deploy.php" <<'EOF'
 <?php
 namespace Deployer;
 
@@ -141,24 +124,33 @@ set('slack_webhook', '');
 set('slack_channel', '');
 EOF
 
-echo "✔ Basic deploy.php template created at $PROJECT_DIR/deploy.php. Please customize it using settings from [repo-root]/deployer/deployer.php."
+echo "✔ Basic deploy.php template created at deploy.php. Please customize it using settings from [repo-root]/deployer/deployer.php."
 
-# 8) Update src/composer.json allow-plugins section
-COMPOSER_JSON="${MAGENTO_ROOT}/composer.json"
-if [ ! -f "$COMPOSER_JSON" ]; then
-  echo "Warning: $COMPOSER_JSON not found, skipping plugin adjustments."
-else
-  echo "Updating allow-plugins in $COMPOSER_JSON"
-  # Insert new plugin entries after magento/* line
-  sed -i '/"magento\/\*": true,/ a\
-            "magento/composer-dependency-version-audit-plugin": false,\
-            "magento/composer-root-update-plugin": false,\
-            "magento/inventory-composer-installer": false,\
-            "magento/magento-composer-installer": true' "$COMPOSER_JSON"
-  echo "✔ Plugin entries inserted after magento/* in $COMPOSER_JSON"
-fi
+echo "modify composer.json"
+COMPOSER_JSON="composer.json"
+
+# 4) Install deployer-magento2 in Magento root
+
+ddev composer require studioraz/deployer-magento --no-update
+echo "Updating lock file"
+ddev composer update --lock --no-interaction
+
+echo "Updating allow-plugins in $COMPOSER_JSON"
+# Insert new plugin entries after magento/* line
+sed -i '/"magento\/\*": true,/ a\
+          "magento/composer-dependency-version-audit-plugin": false,\
+          "magento/composer-root-update-plugin": false,\
+          "magento/inventory-composer-installer": false,\
+          "magento/magento-composer-installer": true' "$COMPOSER_JSON"
+echo "✔ Plugin entries inserted after magento/* in $COMPOSER_JSON"
+
+echo "==> Installing studioraz/deployer-magento2"
+composer require studioraz/deployer-magento --no-update
+echo "Updating lock file"
+composer update --lock --no-interaction
+
 
 echo "🎉 Setup complete! Next steps:"
 echo "  • Review and commit $WORKFLOW_FILE"
-echo "  • cd $MAGENTO_ROOT && npm ci && npm run build-all"
+echo "  • Run npm install && npm run build-all"
 echo "  • Commit and push your changes"
