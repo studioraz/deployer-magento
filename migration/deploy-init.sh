@@ -33,22 +33,14 @@ on:
 $(for opt in "${ENV_OPTS[@]}"; do
   echo "          - $opt"
 done)
-      php-version:
-        description: PHP version to use
-        required: true
-        default: "$PHP_VERSION"
-      project-dir:
-        description: Path to Magento root
-        required: true
-        default: "."
 
 jobs:
   call-build-and-deploy:
     uses: studioraz/ci-templates/.github/workflows/build-and-deploy.yml@v1
     with:
       environment: \${{ inputs.environment }}
-      php-version: \${{ inputs.php-version }}
-      project-dir: \${{ inputs.project-dir }}
+      php-version: "$PHP_VERSION"
+      project-dir: "."
     secrets: inherit
 EOF
 
