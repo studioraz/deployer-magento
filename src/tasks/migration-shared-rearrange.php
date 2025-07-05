@@ -9,6 +9,8 @@ use function Deployer\run;
 use function Deployer\test;
 use function Deployer\task;
 use function Deployer\writeln;
+use function Deployer\output;
+use function Deployer\parse;
 use Symfony\Component\Console\Output\OutputInterface;
 
 desc('Rearranges shared folder structure if it only contains a single "src" directory');
@@ -75,7 +77,7 @@ task('migration:deploy:shared', function () {
         run("[ -f $sharedPath/$file ] || touch $sharedPath/$file");
         run("{{bin/symlink}} $sharedPath/$file $releaseBase/$file");
     }
-})->hidden();
+});
 
 
 desc('Dry-run of migration:shared:rearrange to preview actions');
