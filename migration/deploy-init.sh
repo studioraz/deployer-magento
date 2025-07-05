@@ -36,7 +36,7 @@ done)
 
 jobs:
   call-build-and-deploy:
-    uses: studioraz/ci-templates/.github/workflows/build-and-deploy.yml@v1
+    uses: studioraz/ci-templates/.github/workflows/build-and-deploy.yml@1.0.0
     with:
       environment: \${{ inputs.environment }}
       php-version: "$PHP_VERSION"
@@ -53,8 +53,6 @@ if [[ ! "$USE_HYVA" =~ ^[Yy]$ ]]; then
   echo "Skipping package.json creation for Hyvä"
 else
 echo "==> Creating package.json for Tailwind workspaces"
-read -rp "Theme namespace/vendor (e.g. SR/Base) [SR/Base]: " THEME_NS
-THEME_NS="${THEME_NS:-SR/Base}"
 
 PKG_JSON_FILE="package.json"
 cat > "$PKG_JSON_FILE" <<EOF
@@ -62,11 +60,11 @@ cat > "$PKG_JSON_FILE" <<EOF
   "name": "studioraz/hyva-themes",
   "private": true,
   "workspaces": [
-    "vendor/hyva-themes/hyva-theme-base/web/tailwind",
-    "app/design/frontend/$THEME_NS/web/tailwind"
+    "app/design/frontend/*/*/web/tailwind",
+    "vendor/hyva-themes/hyva-theme-base/web/tailwind"
   ],
   "scripts": {
-    "build-base": "npm --workspace app/design/frontend/$THEME_NS/web/tailwind run build-prod",
+    "build-base": "npm --workspace app/design/frontend/SR/hyva-base/web/tailwind run build-prod",
     "build-all": "npm run build-base"
   }
 }
