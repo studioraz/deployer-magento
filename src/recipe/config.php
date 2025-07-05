@@ -94,6 +94,7 @@ set('shared_dirs', [
     '{{magento_dir}}/pub/sitemap',
     '{{magento_dir}}/pub/media',
     '{{magento_dir}}/pub/static/_cache',
+    '{{magento_dir}}/pub/.well-known'
 ]);
 set('writable_dirs', [
     '{{magento_dir}}/var',
