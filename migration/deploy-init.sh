@@ -57,21 +57,50 @@ echo "==> Creating package.json for Tailwind workspaces"
 PKG_JSON_FILE="package.json"
 cat > "$PKG_JSON_FILE" <<EOF
 {
-  "name": "studioraz/hyva-themes",
+  "name": "studiroaz-package",
   "private": true,
   "workspaces": [
-    "app/design/frontend/*/*/web/tailwind",
-    "vendor/hyva-themes/hyva-theme-base/web/tailwind"
+    "app/design/frontend/SR/hyva-base/web/tailwind",
+    "vendor/hyva-themes/magento2-default-theme/web/tailwind"
   ],
   "scripts": {
+    "postinstall": "patch-package",
     "build-base": "npm --workspace app/design/frontend/SR/hyva-base/web/tailwind run build-prod",
     "build-all": "npm run build-base"
+  },
+  "dependencies": {
+    "patch-package": "^8.0.0"
   }
 }
+
 EOF
 
 echo "✔ package.json written to $PKG_JSON_FILE"
 fi
+
+echo "==> Creating patches directory and generating hyva-modules patch"
+mkdir -p patches
+cat > "patches/@hyva-themes+hyva-modules+1.0.11.patch" <<'EOF'
+diff --git a/src/index.js b/src/index.js
+index OLDHASH..NEWHASH 100644
+--- a/src/index.js
++++ b/src/index.js
+@@ -1,5 +1,9 @@
+ // Global variable with prefix to use inside extensions tailwind.config.js file to require installed node modules.
+ // Usage example: const colors = require(`${themeDirRequire}/tailwindcss/colors`);
+-global.themeDirRequire = `${tailwindDir}/node_modules`
++// Ensure Tailwind plugins resolve from the Magento root node_modules
++global.themeDirRequire = basePath
++  ? path.join(basePath, 'node_modules')
++  : `${tailwindDir}/node_modules`;
++
++// (previous default kept for fallback)
++// global.themeDirRequire = `${tailwindDir}/node_modules`
+
+ /**
+  * Set the purge content as absolute paths on configClone in targetVersion structure
+EOF
+echo "✔ Generated patches/@hyva-themes+hyva-modules+1.0.11.patch"
 
 # 7) Create a basic deploy.php template in the Magento root
 echo "==> Generating a basic deploy.php template in deploy.php"
