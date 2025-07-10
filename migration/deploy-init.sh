@@ -36,7 +36,7 @@ done)
 
 jobs:
   call-build-and-deploy:
-    uses: studioraz/ci-templates/.github/workflows/build-and-deploy.yml@1.0.0
+    uses: studioraz/ci-templates/.github/workflows/build-and-deploy.yml@master
     with:
       environment: \${{ inputs.environment }}
       php-version: "$PHP_VERSION"
