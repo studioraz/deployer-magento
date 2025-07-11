@@ -131,8 +131,8 @@ task('magento:sync:content_version', function () {
 before('magento:deploy:assets', 'magento:sync:content_version');
 
 before('magento:deploy:assets', function() {
-    writeln('Hyva themes detected, building TailwindCSS...');
-    if (!test('[ -f {{release_or_current_path}}/{{magento_dir}}/app/etc/hyva-themes.json ]')) {
+    if (test('[ -f {{release_or_current_path}}/{{magento_dir}}/app/etc/hyva-themes.json ]')) {
+        writeln('Hyva themes detected, building TailwindCSS...');
         invoke('hyva:tailwind:build');
     }
 });
