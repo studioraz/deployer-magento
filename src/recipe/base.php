@@ -46,15 +46,8 @@ add('recipes', ['magento2']);
 
 desc('Compiles magento di');
 task('magento:compile', function () {
-    if (test('[ ! -d {{release_or_current_path}}/{{magento_dir}}/generated/code ]')) {
         run("{{bin/php}} {{bin/magento}} setup:di:compile");
-
-        // avoid running composer dump-autoload to allow caching healthy vendor version for next deploy.
-        //run('cd {{release_or_current_path}}/{{magento_dir}} && {{bin/composer}} dump-autoload -o');
-
-    } else {
-        writeln('<info>Generated cache found. Skipping compilation.</info>');
-    }
+        run('cd {{release_or_current_path}}/{{magento_dir}} && {{bin/composer}} dump-autoload -o');
 });
 
 desc('Deploys assets');
@@ -137,7 +130,12 @@ task('magento:sync:content_version', function () {
 
 before('magento:deploy:assets', 'magento:sync:content_version');
 
-before('magento:deploy:assets', 'hyva:tailwind:build');
+before('magento:deploy:assets', function() {
+    writeln('Hyva themes detected, building TailwindCSS...');
+    if (!test('[ -f {{release_or_current_path}}/{{magento_dir}}/app/etc/hyva-themes.json ]')) {
+        invoke('hyva:tailwind:build');
+    }
+});
 
 
 desc('Enables maintenance mode');

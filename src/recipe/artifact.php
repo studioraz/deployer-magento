@@ -145,18 +145,18 @@ task('build:prepare', function () {
     if (!currentHost()->get('local')) {
         throw new GracefulShutdownException('Artifact can only be built locally, you provided a non local host');
     }
-
-    $buildDir = '.';
-    set('deploy_path', $buildDir);
-    set('release_path', $buildDir);
-    set('current_path', $buildDir);
+    // NOTE: the following variables are defined in the deploy.php file
+    //$buildDir = '.';
+    //set('deploy_path', $buildDir);
+    //set('release_path', $buildDir);
+    //set('current_path', $buildDir);
 
 });
 
 desc('Builds an artifact.');
 task('artifact:build', [
     'build:prepare',
-    'magento:compile',
+    //'magento:compile', // NOTE:  di is compiled and cached in GitHub workflow action
     'magento:deploy:assets',
     'artifact:package',
 ]);

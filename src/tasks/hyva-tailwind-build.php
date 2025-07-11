@@ -11,10 +11,5 @@ use function Deployer\test;
 
 desc('Builds TailwindCSS for Hyva themes');
 task('hyva:tailwind:build', function () {
-    if (test('[ -f {{hyva_tailwind_package_path}} ]')) {
-        writeln('Found package.json at magento root folder. Running npm ci and build-all');
-        run('cd {{release_or_current_path}}/{{magento_dir}} && npm ci && npm run build-all');
-    } else {
-        writeln('No package.json at magento root folder. Skipping Tailwind build.');
-    }
+    run('cd {{release_or_current_path}}/{{magento_dir}} && npm ci && npm run build-all');
 });
