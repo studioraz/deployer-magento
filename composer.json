@@ -2,10 +2,11 @@
   "name": "studioraz/deployer-magento",
   "description": "Standalone Deployer recipes and artifact tooling for Magento 2",
   "license": "MIT",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "require": {
     "php": ">=8.0",
-    "deployer/deployer": "^7.3"
+    "deployer/deployer": "^7.3",
+    "studioraz/n98-magerun-commands": "^1.0"
   },
   "autoload": {
     "psr-4": {
