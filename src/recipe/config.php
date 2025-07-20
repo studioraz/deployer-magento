@@ -30,6 +30,12 @@ set('writable_mode', 'chmod');
 // in you deployer script.
 set('static_content_locales', 'en_US');
 
+// Define the deployment strategy. Use these options only if you have more than one local.
+// Use the 'quick' strategy to minimize deployment time. This is the default command option if not specified.
+// Use the 'standard' strategy to deploy all static view files for all packages.
+// Use the 'compact' strategy to conserve disk space on the server.
+set('static_deploy_strategy', 'quick');
+
 // Configuration
 
 // You can also set the themes to run against. By default it'll deploy
