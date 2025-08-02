@@ -58,51 +58,14 @@ for item in src/* src/.*; do
   fi
 done
 
-# 4. Remove dev/ folder from Git tracking and ignore it
+# 4. ignore dev/tests folder
 if [[ -d dev ]]; then
-  echo "Removing dev/tests folder from Git tracking"
-  git rm -r --cached dev/tests
+  echo "Ignore dev/tests folder"
   touch .gitignore
-  if ! grep -qxF "dev/" .gitignore; then
-    echo "Adding 'dev/' to .gitignore"
+  if ! grep -qxF "dev/tests" .gitignore; then
+    echo "Adding 'dev/tests' to .gitignore"
     echo "dev/tests" >> .gitignore
     git add .gitignore
-  fi
-fi
-
-# 4b. Remove specified files from Git and filesystem
-FILES_TO_REMOVE=(
-  "SECURITY.md"
-  "package.json.sample"
-  "nginx.conf.sample"
-  "LICENSE_AFL.txt"
-  "LICENSE.txt"
-  "Gruntfile.js.sample"
-  "grunt-config.json.sample"
-  "COPYING.txt"
-  "CHANGELOG.md"
-  "auth.json.sample"
-  ".php-cs-fixer.dist.php"
-  ".htaccess.sample"
-  ".editorconfig"
-  ".htaccess"
-)
-
-for file in "${FILES_TO_REMOVE[@]}"; do
-  if [[ -e "$file" ]]; then
-    echo "Removing $file from Git and filesystem"
-    git rm -f "$file" 2>/dev/null || rm -f "$file"
-  fi
-done
-
-# 5. Remove src/ directory if now empty
-if [[ -d src ]]; then
-  if [[ -z "$(ls -A src)" ]]; then
-    echo "Removing empty src/ directory"
-    rmdir src
-  else
-    echo "src/ still contains files; not removed. Contents:"
-    ls -A src
   fi
 fi
 
