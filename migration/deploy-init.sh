@@ -40,7 +40,6 @@ jobs:
     with:
       environment: \${{ inputs.environment }}
       php-version: "$PHP_VERSION"
-      project-dir: "."
     secrets: inherit
 EOF
 
