@@ -314,3 +314,22 @@ task('magento:cleanup_cache_prefix', function () {
 
 after('deploy:shared', 'magento:set_cache_prefix');
 after('deploy:magento', 'magento:cleanup_cache_prefix');
+
+// Override native deploy:cleanup to prevent SSH blocking
+desc('Cleanup old releases');
+task('deploy:cleanup', function () {
+    $releases = get('releases_list');
+    $keep = get('keep_releases');
+    $sudo = get('cleanup_use_sudo') ? 'sudo' : '';
+
+    // Ensure "release" symlink is cleaned up
+    run("cd {{deploy_path}} && if [ -e release ]; then rm release; fi");
+
+    if ($keep > 0) {
+        foreach (array_slice($releases, $keep) as $release) {
+            // Run rm -rf in background using nohup to avoid SSH blocking
+            $path = "{{deploy_path}}/releases/$release";
+            run("nohup $sudo rm -rf $path > /dev/null 2>&1 &");
+        }
+    }
+});
