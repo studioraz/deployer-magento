@@ -116,7 +116,10 @@ use SR\Deployer\RecipeLoader;
 RecipeLoader::load();
 
 localhost()
-    ->set('local', true);
+    ->set('local', true)
+    ->set('deploy_path', getcwd())
+    ->set('release_path', getcwd())
+    ->set('current_path', getcwd());
 
 // **************************** Hosts **************************/
 
