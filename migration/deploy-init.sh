@@ -162,7 +162,7 @@ sed -i '/"magento\/\*": true,/ a\
           "magento/magento-composer-installer": true' "$COMPOSER_JSON"
 echo "✔ Plugin entries inserted after magento/* in $COMPOSER_JSON"
 
-echo "==> Installing studioraz/deployer-magento2"
+echo "==> Installing studioraz/deployer-magento"
 composer require studioraz/deployer-magento --no-update
 echo "Updating lock file"
 composer update --lock --no-interaction
