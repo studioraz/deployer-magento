@@ -120,6 +120,8 @@ set('clear_paths', [
 
 set('bin/magento', '{{release_or_current_path}}/{{magento_dir}}/bin/magento');
 
+set('bin/n98', '{{release_or_current_path}}/{{magento_dir}}/bin/n98');
+
 set('magento_version', function () {
     // detect version
     $versionOutput = run('{{bin/php}} {{bin/magento}} --version');
