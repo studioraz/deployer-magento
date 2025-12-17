@@ -168,6 +168,7 @@ task('magento:config:import', function () {
 
 after('magento:config:import', 'config:data:import');
 
+before('magento:upgrade:db', 'magento:cache:clean:pre_upgrade');
 
 desc('Upgrades magento database');
 task('magento:upgrade:db', function () {
