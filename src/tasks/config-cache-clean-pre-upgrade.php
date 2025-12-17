@@ -6,6 +6,7 @@ use function Deployer\commandExist;
 use function Deployer\desc;
 use function Deployer\run;
 use function Deployer\task;
+use function Deployer\get;
 use function Deployer\warning;
 
 desc('Config cache clean pre-upgrade ');
