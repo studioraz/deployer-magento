@@ -168,8 +168,6 @@ task('magento:config:import', function () {
 
 after('magento:config:import', 'config:data:import');
 
-before('magento:upgrade:db', 'magento:cache:clean:pre_upgrade');
-
 desc('Upgrades magento database');
 task('magento:upgrade:db', function () {
     if (get('database_upgrade_needed')) {
@@ -179,6 +177,8 @@ task('magento:upgrade:db', function () {
         writeln('Database schema is up to date => upgrade skipped');
     }
 })->once();
+
+before('magento:upgrade:db', 'magento:cache:clean:pre_upgrade');
 
 desc('Flushes Magento Cache');
 task('magento:cache:flush', function () {
