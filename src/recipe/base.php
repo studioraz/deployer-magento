@@ -178,24 +178,37 @@ task('magento:upgrade:db', function () {
     }
 })->once();
 
+
+/**
+ * clean config cache before db upgrade
+ */
 before('magento:upgrade:db', 'magento:cache:clean:pre_upgrade');
 
+/**
+ * flush and enable caches after deploy is over
+ */
 desc('Flushes Magento Cache');
-task('magento:cache:flush', function () {
+task('magento:cache:enable-and-flush', function () {
     run("{{bin/php}} {{bin/magento}} cache:flush");
+    run("{{bin/php}} {{bin/magento}} cache:enable");
 });
+after('deploy:symlink', 'magento:cache:enable-and-flush');
 
 
-after('deploy:symlink', 'magento:cache:flush');
-
+/**
+ * Disable maintenance mode on failure
+ */
 after('deploy:failed', 'magento:maintenance:disable');
 
-
+/**
+ * Additional shared files and dirs
+ */
 desc('Adds additional files and dirs to the list of shared files and dirs');
 task('deploy:additional-shared', function () {
     add('shared_files', get('additional_shared_files'));
     add('shared_dirs', get('additional_shared_dirs'));
 });
+
 
 // **************************** Cron utility tasks **************************/
 
