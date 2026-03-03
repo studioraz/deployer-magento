@@ -15,7 +15,7 @@ desc('Import custom config from JSON files');
 task('config:data:import', function () {
     if (test('[ -d {{config_store_path}} ]')) {
         run('{{bin/php}} {{bin/magento}} config:data:import {{config_store_path}} '
-            . currentHost()->getAlias() . ' --no-cache');
+            . currentHost()->getAlias() . ' --no-cache --lock-config');
     } else {
         writeln('<info>config/store folder not found – skipping config:data:import.</info>');
     }

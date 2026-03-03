@@ -150,13 +150,6 @@ task('magento:maintenance:disable', function () {
     run("if [ -d $(echo {{current_path}}) ]; then {{bin/php}} {{current_path}}/{{magento_dir}}/bin/magento maintenance:disable; fi");
 });
 
-desc('Set maintenance mode if needed');
-task('magento:maintenance:enable-if-needed', function () {
-    ! get('enable_zerodowntime') || get('database_upgrade_needed') || get('config_import_needed') ?
-        invoke('magento:maintenance:enable') :
-        writeln('Config and database up to date => no maintenance mode');
-});
-
 desc('Config Import');
 task('magento:config:import', function () {
     if (get('config_import_needed')) {
@@ -165,8 +158,14 @@ task('magento:config:import', function () {
         writeln('App config is up to date => import skipped');
     }
 });
+before('magento:config:import', 'config:data:import');
 
-after('magento:config:import', 'config:data:import');
+desc('Set maintenance mode if needed');
+task('magento:maintenance:enable-if-needed', function () {
+    ! get('enable_zerodowntime') || get('database_upgrade_needed') || get('config_import_needed') ?
+        invoke('magento:maintenance:enable') :
+        writeln('Config and database up to date => no maintenance mode');
+});
 
 desc('Upgrades magento database');
 task('magento:upgrade:db', function () {
@@ -249,8 +248,8 @@ task('magento:cron:install', function () {
 desc('Magento2 deployment operations');
 task('deploy:magento', [
     'magento:build',
-    'magento:maintenance:enable-if-needed',
     'magento:config:import',
+    'magento:maintenance:enable-if-needed',
     'magento:upgrade:db',
     'magento:maintenance:disable',
 ]);
