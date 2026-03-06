@@ -185,8 +185,8 @@ task('artifact:finish', [
 desc('Actually releases the artifact deployment');
 task('artifact:deploy', [
     'artifact:prepare',
-    'magento:maintenance:enable-if-needed',
     'magento:config:import',
+    'magento:maintenance:enable-if-needed',
     'magento:upgrade:db',
     'magento:maintenance:disable',
     'deploy:symlink',
