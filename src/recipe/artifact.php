@@ -51,7 +51,42 @@ set('artifact_includes', [
 ]);
 
 set('artifact_excludes', [
+    // ── JavaScript ────────────────────────────────────────────────────────────
+    // Never needed server-side; safe to exclude everywhere
     '**/node_modules/**',
+
+    // ── Vendor test suites ────────────────────────────────────────────────────
+    // All capitalisation variants actually present in this vendor tree:
+    //   PascalCase  – mage-os/*, symfony/*, aligent/*, creatuity/*
+    //   lowercase   – allure, phpgt, colinmollenhour, weew, tubalmartin, …
+    //   plural      – most third-party libraries (doctrine, sebastian, squizlabs, …)
+    'vendor/**/Test/**',
+    'vendor/**/Tests/**',
+    'vendor/**/test/**',
+    'vendor/**/tests/**',
+
+    // ── Package-internal dev tooling ──────────────────────────────────────────
+    // Only mage-os/magento2-base and magento/magento2-functional-testing-framework
+    // have a top-level dev/ dir; both contain tests / grunt tools only.
+    'vendor/**/dev/**',
+
+    // ── Documentation ─────────────────────────────────────────────────────────
+    // doc/  – mage-os/magento-composer-installer, mage-os/module-page-builder-*
+    // docs/ – elasticsearch, csharpru/vault-php, doctrine/annotations, mage-os/*, …
+    'vendor/**/doc/**',
+    'vendor/**/docs/**',
+
+    // ── Usage examples ────────────────────────────────────────────────────────
+    // example/  – duosecurity/duo_universal_php
+    'vendor/**/example/**',
+    'vendor/**/examples/**',
+
+    // ── CI / static-analysis config inside packages ───────────────────────────
+    // These hidden directories are not needed at runtime
+    'vendor/**/.github/**',
+    'vendor/**/.ci/**',
+    'vendor/**/.laminas-ci/**',
+    'vendor/**/.psalm/**',
 ]);
 
 // Helper to materialise an array into a temporary file and return the path
