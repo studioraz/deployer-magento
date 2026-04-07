@@ -86,7 +86,13 @@ if command -v ddev >/dev/null 2>&1; then
   ddev restart
 fi
 
-# 9. Final reminder
+# 9. Dump Magento app config
+if command -v ddev >/dev/null 2>&1; then
+  echo "Dumping Magento app config (scopes themes)"
+  ddev magento app:config:dump scopes themes
+fi
+
+# 10. Final reminder
 echo
 echo "Done. Review with 'git status' and commit with:"
 echo "  git commit -m 'Move all content from src/ to root, remove dev/, update .gitignore, update composer.json Magento flags'"
