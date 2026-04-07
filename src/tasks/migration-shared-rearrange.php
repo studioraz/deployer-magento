@@ -4,6 +4,7 @@ namespace SR\Deployer;
 
 use function Deployer\desc;
 use function Deployer\get;
+use function Deployer\has;
 use function Deployer\invoke;
 use function Deployer\run;
 use function Deployer\test;
@@ -19,23 +20,26 @@ task('migration:shared:rearrange', function () {
 
     // Ensure there's only one subdirectory and it is named 'src'
     $entries = explode("\n", run("ls -1 $shared"));
-    if (count($entries) !== 1 || trim($entries[0]) !== 'src') {
-        writeln('<notice>❌ shared directory must contain only a single "src" folder. Aborting.</notice>');
-        return;
+    $hasSingleSrc = count($entries) === 1 && trim($entries[0]) === 'src';
+    if ($hasSingleSrc) {
+        writeln('📂 Contents of shared/src:');
+        run("ls -1 $shared/src");
+
+        writeln('➡ Moving contents from shared/src to shared...');
+        run("mv $shared/src/* $shared/ && rmdir $shared/src");
+
+        writeln('📂 New contents of shared:');
+        run("ls -1 $shared");
+    } else {
+        writeln('<comment>ℹ️ shared directory is not a single "src" folder. Skipping rearrange step.</comment>');
     }
-
-    writeln('📂 Contents of shared/src:');
-    run("ls -1 $shared/src");
-
-    writeln('➡ Moving contents from shared/src to shared...');
-    run("mv $shared/src/* $shared/ && rmdir $shared/src");
-
-    writeln('📂 New contents of shared:');
-    run("ls -1 $shared");
 
     writeln('⚙️ Invoking migration:deploy:shared to apply symlinks...');
     writeln('🔁 Re-symlinking shared items into current release...');
     invoke('migration:deploy:shared');
+
+    writeln('🧰 Updating crontab and logrotate paths (if present)...');
+    invoke('migration:paths:update');
 
     writeln('<info>✅ Shared structure rearranged and re-symlinked successfully.</info>');
 });
@@ -80,6 +84,156 @@ task('migration:deploy:shared', function () {
 });
 
 
+desc('Update crontab and logrotate paths after shared/src flattening');
+task('migration:paths:update', function () {
+    $deployPath = get('deploy_path');
+
+    $cronReplacements = has('migration_cron_replacements')
+        ? get('migration_cron_replacements')
+        : [
+            $deployPath . '/current/src/' => $deployPath . '/current/',
+        ];
+
+    $logrotateReplacements = has('migration_logrotate_replacements')
+        ? get('migration_logrotate_replacements')
+        : [
+            $deployPath . '/shared/src/' => $deployPath . '/shared/',
+        ];
+
+    $logrotateFiles = has('migration_logrotate_files')
+        ? (array) get('migration_logrotate_files')
+        : [$deployPath . '/logrotate.conf'];
+
+    // Update crontab paths if crontab exists.
+    $crontab = run('crontab -l || true');
+    if (trim($crontab) !== '') {
+        $updatedCrontab = $crontab;
+        foreach ($cronReplacements as $from => $to) {
+            $updatedCrontab = str_replace($from, $to, $updatedCrontab);
+        }
+
+        if ($updatedCrontab !== $crontab) {
+            $updatedCrontab = rtrim($updatedCrontab, "\n") . "\n";
+            run("printf %s " . escapeshellarg($updatedCrontab) . " | crontab -");
+            writeln('<info>✅ Crontab updated.</info>');
+        } else {
+            writeln('<comment>ℹ️ Crontab already up to date.</comment>');
+        }
+    } else {
+        writeln('<comment>ℹ️ No crontab found for current user.</comment>');
+    }
+
+    // Update logrotate config paths when file exists.
+    foreach ($logrotateFiles as $logrotateFile) {
+        if (!test("[ -f $logrotateFile ]")) {
+            writeln("<comment>ℹ️ Logrotate file not found: $logrotateFile</comment>");
+            continue;
+        }
+
+        $logrotateContent = run("cat $logrotateFile");
+        $updatedLogrotate = $logrotateContent;
+        foreach ($logrotateReplacements as $from => $to) {
+            $updatedLogrotate = str_replace($from, $to, $updatedLogrotate);
+        }
+
+        if ($updatedLogrotate !== $logrotateContent) {
+            $updatedLogrotate = rtrim($updatedLogrotate, "\n") . "\n";
+            run("printf %s " . escapeshellarg($updatedLogrotate) . " | tee $logrotateFile > /dev/null");
+            writeln("<info>✅ Logrotate updated: $logrotateFile</info>");
+        } else {
+            writeln("<comment>ℹ️ Logrotate already up to date: $logrotateFile</comment>");
+        }
+    }
+});
+
+
+desc('Dry-run preview of crontab and logrotate path updates');
+task('migration:paths:dry-run', function () {
+    $deployPath = get('deploy_path');
+
+    $cronReplacements = has('migration_cron_replacements')
+        ? get('migration_cron_replacements')
+        : [
+            $deployPath . '/current/src/' => $deployPath . '/current/',
+        ];
+
+    $logrotateReplacements = has('migration_logrotate_replacements')
+        ? get('migration_logrotate_replacements')
+        : [
+            $deployPath . '/shared/src/' => $deployPath . '/shared/',
+        ];
+
+    $logrotateFiles = has('migration_logrotate_files')
+        ? (array) get('migration_logrotate_files')
+        : [$deployPath . '/logrotate.conf'];
+
+    $crontab = run('crontab -l || true');
+    if (trim($crontab) !== '') {
+        $updatedCrontab = $crontab;
+        foreach ($cronReplacements as $from => $to) {
+            $updatedCrontab = str_replace($from, $to, $updatedCrontab);
+        }
+
+        if ($updatedCrontab !== $crontab) {
+            writeln('<info>🧰 [Dry Run] Crontab changes:</info>');
+            $oldLines = explode("\n", $crontab);
+            $newLines = explode("\n", $updatedCrontab);
+            $max = max(count($oldLines), count($newLines));
+            for ($i = 0; $i < $max; $i++) {
+                $old = $oldLines[$i] ?? '';
+                $new = $newLines[$i] ?? '';
+                if ($old !== $new) {
+                    if (trim($old) !== '') {
+                        writeln('- ' . $old);
+                    }
+                    if (trim($new) !== '') {
+                        writeln('+ ' . $new);
+                    }
+                }
+            }
+        } else {
+            writeln('<comment>ℹ️ [Dry Run] Crontab already up to date.</comment>');
+        }
+    } else {
+        writeln('<comment>ℹ️ [Dry Run] No crontab found for current user.</comment>');
+    }
+
+    foreach ($logrotateFiles as $logrotateFile) {
+        if (!test("[ -f $logrotateFile ]")) {
+            writeln("<comment>ℹ️ [Dry Run] Logrotate file not found: $logrotateFile</comment>");
+            continue;
+        }
+
+        $logrotateContent = run("cat $logrotateFile");
+        $updatedLogrotate = $logrotateContent;
+        foreach ($logrotateReplacements as $from => $to) {
+            $updatedLogrotate = str_replace($from, $to, $updatedLogrotate);
+        }
+
+        if ($updatedLogrotate !== $logrotateContent) {
+            writeln("<info>🧰 [Dry Run] Logrotate changes for $logrotateFile:</info>");
+            $oldLines = explode("\n", $logrotateContent);
+            $newLines = explode("\n", $updatedLogrotate);
+            $max = max(count($oldLines), count($newLines));
+            for ($i = 0; $i < $max; $i++) {
+                $old = $oldLines[$i] ?? '';
+                $new = $newLines[$i] ?? '';
+                if ($old !== $new) {
+                    if (trim($old) !== '') {
+                        writeln('- ' . $old);
+                    }
+                    if (trim($new) !== '') {
+                        writeln('+ ' . $new);
+                    }
+                }
+            }
+        } else {
+            writeln("<comment>ℹ️ [Dry Run] Logrotate already up to date: $logrotateFile</comment>");
+        }
+    }
+});
+
+
 desc('Dry-run of migration:shared:rearrange to preview actions');
 task('migration:shared:dry-run', function () {
     $shared = get('deploy_path') . '/shared';
@@ -107,4 +261,7 @@ task('migration:shared:dry-run', function () {
     foreach (get('shared_files') as $file) {
         writeln('[Dry Run] {{bin/symlink}} ' . $shared . '/' . $file . ' ' . $releaseBase . '/' . $file);
     }
+
+    writeln('🧰 [Dry Run] Would update crontab and logrotate paths (if present)');
+    invoke('migration:paths:dry-run');
 });
