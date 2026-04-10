@@ -18,6 +18,9 @@ desc('Rearranges shared folder structure if it only contains a single "src" dire
 task('migration:shared:rearrange', function () {
     $shared = get('deploy_path') . '/shared';
 
+    writeln('💾 Creating media backup before any changes...');
+    invoke('migration:media:backup');
+
     // Ensure there's only one subdirectory and it is named 'src'
     $entries = explode("\n", run("ls -1 $shared"));
     $hasSingleSrc = count($entries) === 1 && trim($entries[0]) === 'src';
@@ -40,6 +43,7 @@ task('migration:shared:rearrange', function () {
 
     writeln('🧰 Updating crontab and logrotate paths (if present)...');
     invoke('migration:paths:update');
+
 
     writeln('<info>✅ Shared structure rearranged and re-symlinked successfully.</info>');
 });
@@ -147,7 +151,38 @@ task('migration:paths:update', function () {
 });
 
 
-desc('Dry-run preview of crontab and logrotate path updates');
+desc('Backup pub/media from shared/src to deploy_path');
+task('migration:media:backup', function () {
+    $deployPath = get('deploy_path');
+    $mediaSource = $deployPath . '/shared/src/pub/media';
+    $timestamp   = run('date +%Y%m%d_%H%M%S');
+    $backupFile  = $deployPath . '/media_backup_' . trim($timestamp) . '.tar.gz';
+
+    if (!test("[ -d $mediaSource ]")) {
+        throw new \RuntimeException("❌ Media source directory not found: $mediaSource");
+    }
+
+    writeln("📦 Creating media backup from: $mediaSource");
+    writeln("📁 Destination: $backupFile");
+
+    run("tar -czf $backupFile -C " . dirname($mediaSource) . " " . basename($mediaSource));
+
+    if (!test("[ -f $backupFile ]")) {
+        throw new \RuntimeException('❌ Backup file was not created.');
+    }
+
+    $sizeBytes = (int) run("stat -c%s $backupFile");
+    $sizeMB    = round($sizeBytes / 1024 / 1024, 2);
+
+    if ($sizeBytes === 0) {
+        throw new \RuntimeException('❌ Backup file was created but is empty (0 bytes).');
+    }
+
+    writeln("<info>✅ Media backup created successfully: $backupFile ({$sizeMB} MB)</info>");
+});
+
+
+desc('Dry-run of migration:shared:rearrange to preview actions');
 task('migration:paths:dry-run', function () {
     $deployPath = get('deploy_path');
 
