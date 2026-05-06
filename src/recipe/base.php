@@ -18,7 +18,6 @@ foreach (glob(__DIR__ . '/../tasks/*.php') as $file) {
 use Deployer\Host\Host;
 use Deployer\ConfigurationException;
 use function Deployer\localhost;
-use function Deployer\Support\array_is_list;
 use function Deployer\add;
 use function Deployer\desc;
 use function Deployer\run;
