@@ -3,7 +3,6 @@
   "description": "Standalone Deployer recipes and artifact tooling for Magento 2",
   "license": "MIT",
   "require": {
-    "php": ">=8.0",
     "deployer/deployer": "^8.0"
   },
   "autoload": {
