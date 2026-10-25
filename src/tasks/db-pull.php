@@ -28,6 +28,7 @@ Variables:
   full   (bool)  If true, do NOT strip anything (full DB). Default: false.
   strip  (string)Value for --strip. Space-separated groups/tables.
           If not provided, defaults to "@trade @log".
+  dest   (string)Local path for the dump. Default: ./.db/backups/db-<env>-<timestamp>.sql.gz.
 
 Examples:
   # Full sync (strip @trade and @log by default)
@@ -41,6 +42,9 @@ Examples:
 
   # Download only (no import)
   dep db:pull staging -o import=false
+
+  # Download only, to a fixed path (e.g. in CI)
+  dep db:pull production -o import=false -o dest=./.db/prod.sql.gz
 DESC
 );
 
@@ -48,7 +52,7 @@ task('db:pull', function () {
     $ts         = date('Ymd-His');
     $hostAlias  = currentHost()->getAlias();
     $dumpRemote = "/tmp/db-{$hostAlias}-{$ts}.sql.gz";
-    $dumpLocal  = "./.db/backups/db-{$hostAlias}-{$ts}.sql.gz";
+    $dumpLocal  = trim((string) get('dest', '')) ?: "./.db/backups/db-{$hostAlias}-{$ts}.sql.gz";
 
     $shouldImport = filter_var(get('import', true), FILTER_VALIDATE_BOOLEAN);
     $fullDump     = filter_var(get('full', false), FILTER_VALIDATE_BOOLEAN);
@@ -70,7 +74,7 @@ task('db:pull', function () {
     writeln("<info>[db:pull] Creating remote dump via n98...</info>");
     writeln("<comment>[db:pull] Dump command: {$dumpCmd}</comment>");
     run('mkdir -p ' . escapeshellarg(dirname($dumpRemote)));
-    run($dumpCmd);
+    run($dumpCmd, ['timeout' => null]);
 
     writeln("<info>[db:pull] Downloading dump...</info>");
     runLocally('mkdir -p ' . escapeshellarg(dirname($dumpLocal)));
