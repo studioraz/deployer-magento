@@ -1,0 +1,12 @@
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  call-pr-title:
+    uses: studioraz/ci-templates/.github/workflows/pr-title.yml@master
