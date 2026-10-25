@@ -1,5 +1,7 @@
 name: PR title
 
+# Inlined from studioraz/ci-templates pr-title.yml (private, so not callable from here).
+
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
@@ -8,5 +10,12 @@ permissions:
   pull-requests: read
 
 jobs:
-  call-pr-title:
-    uses: studioraz/ci-templates/.github/workflows/pr-title.yml@master
+  pr-title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    steps:
+      # Squash merges put the PR title on master as the commit subject, which
+      # release-please turns into the version bump and changelog entry.
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
