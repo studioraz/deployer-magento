@@ -1,0 +1,29 @@
+name: Release
+
+# Inlined from studioraz/ci-templates release-please.yml: that repo is private, and a
+# public repository cannot call its reusable workflows. Keep release-please-config.json
+# in line with ci-templates' release-please-config.base.json by hand.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: release-please-${{ github.repository }}
+      cancel-in-progress: false
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          # Optional PAT / GitHub App token; without it CI does not run on the release PR.
+          token: ${{ secrets.RELEASE_TOKEN || github.token }}
+          target-branch: master
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
